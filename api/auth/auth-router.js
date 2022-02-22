@@ -1,5 +1,8 @@
 
 const router = require('express').Router();
+const bcrypt = require('bcryptjs');
+const { json } = require('express/lib/response');
+const helpers = require('../users/users-model')
 const {
     checkPasswordLength,
     checkUsernameExists,
@@ -33,8 +36,16 @@ const {
   }
  */
 
-  router.post('/register', checkUsernameFree, checkPasswordLength, (req, res, next) => {
-    res.json({message: 'nicejob hommie register'})
+  router.post('/register', checkUsernameFree, checkPasswordLength, async (req, res, next) => {
+    try {
+      const {username, password} = req.body
+      const hash = bcrypt.hashSync(password, 8)
+      const newUser = { username, password: hash}
+      const inserted = await helpers.add(newUser)
+      res.status(200).json(inserted)
+    } catch(err){
+      next(err)
+    }
   })
 
 

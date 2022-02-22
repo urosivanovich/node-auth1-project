@@ -7,11 +7,12 @@ const helpers = require('../users/users-model')
     "message": "You shall not pass!"
   }
 */
-async function restricted(req, res, next) {
-
- 
+async function restricted (req, res, next) {
+  if(req.session.user){
     next()
-
+  }else{
+    res.status(401).json({message:"You shall not pass!" })
+  }
 }
 
 /*
