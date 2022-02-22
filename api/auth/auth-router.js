@@ -1,7 +1,6 @@
 
 const router = require('express').Router();
 const bcrypt = require('bcryptjs');
-const { json } = require('express/lib/response');
 const helpers = require('../users/users-model')
 const {
     checkPasswordLength,
@@ -42,7 +41,7 @@ const {
       const hash = bcrypt.hashSync(password, 8)
       const newUser = { username, password: hash}
       const inserted = await helpers.add(newUser)
-      res.status(200).json(inserted)
+      res.status(201).json(inserted)
     } catch(err){
       next(err)
     }
@@ -65,8 +64,15 @@ const {
   }
  */
 
-  router.post('/login', checkUsernameExists, (req, res, next) => {
-    res.json({message: 'nicejob hommie login'})
+  router.post('/login', checkUsernameExists, async (req, res, next) => { // eslint-disable-line
+    const { username, password} = req.body
+    const [user] = await helpers.findBy({username})
+    if(user && bcrypt.compareSync(password, user.password)){
+      req.session.user = user
+      res.json({status: 200, message: `Welcome ${username}`})
+    }else{
+      res.json({status:401, message:"Invalid credentials"})
+    }
   })
 
 
@@ -87,8 +93,17 @@ const {
  */
 
   router.get('/logout', (req, res, next) => {
-    res.json({message: 'nicejob hommie logout'})
+  if(req.session.user){
+    req.session.destroy((err) => {
+      if(err) {
+        res.json({message: 'could you please retry'})
+      }else{
+        res.json({message: "logged out", status: 200 })
+      }
+    })
+  }else{
+    next({ status: 200, message: "no session" })
+  }
+  
   })
-
-
 module.exports = router

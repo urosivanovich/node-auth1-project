@@ -26,8 +26,8 @@ async function restricted (req, res, next) {
 async function checkUsernameFree(req, res, next) {
   const { username } = req.body
 try {
-  const taken = await helpers.findBy({username: username}) 
-  if(!taken.length){
+  const taken = await helpers.findBy({username}).first()
+  if(!taken){
     next()
   }else{
     res.status(422).json({message: 'Username taken'})
@@ -48,8 +48,8 @@ try {
 async function checkUsernameExists(req, res, next) {
   const { username } = req.body
   try {
-    const exist = await helpers.findBy({username: username}) 
-    if(exist.length){
+    const exist = await helpers.findBy({username}).first()
+    if(exist){
       next()
     }else{
       res.status(401).json({message: 'Invalid credentials'})
@@ -69,9 +69,9 @@ async function checkUsernameExists(req, res, next) {
 */
 async function checkPasswordLength(req, res, next) {
   try {
-    const hasPass = await helpers.findBy({password: req.body.password})
-    if(!hasPass || req.body.password.length < 3){
-      res.status(422).json({message: 'Password must be longer than 3 chars'})
+    const { password } = req.body
+    if(!password || password.length < 3){
+      res.status(422).json({message: "Password must be longer than 3 chars"})
     }else{
       next()
     }
