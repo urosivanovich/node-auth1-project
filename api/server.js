@@ -29,12 +29,12 @@ server.use(session({
   secret: 'keep it secret',
   cookie: {
     maxAge: 1000 * 60 * 20,
-    secure: false,
-    htpOnly: false,
+    secure: false, // if true, only works  on HTTPS
+    httpOnly: false, // If true, javascript can't read cookie
   },
-  rolling: true,
+  rolling: true, // resets the session to maxAge
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: false, // if true server would always save the session
 }))
 
 const usersRouter = require('./users/users-router')

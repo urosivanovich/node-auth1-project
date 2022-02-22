@@ -37,10 +37,14 @@ const {
 
   router.post('/register', checkUsernameFree, checkPasswordLength, async (req, res, next) => {
     try {
+      // pulls credentials from req.body
       const {username, password} = req.body
+      // hash the password 2^8
       const hash = bcrypt.hashSync(password, 8)
+      // store newUser in db
       const newUser = { username, password: hash}
       const inserted = await helpers.add(newUser)
+      // respond
       res.status(201).json(inserted)
     } catch(err){
       next(err)
@@ -65,10 +69,13 @@ const {
  */
 
   router.post('/login', checkUsernameExists, async (req, res, next) => { // eslint-disable-line
+    // pull username and password from req.body
     const { username, password} = req.body
+    // pull the username from the db by the username
     const [user] = await helpers.findBy({username})
     if(user && bcrypt.compareSync(password, user.password)){
-      req.session.user = user
+      // password good, we can initialize a session
+      req.session.user = user // THIS CODE DOES EVERYTHING
       res.json({status: 200, message: `Welcome ${username}`})
     }else{
       res.json({status:401, message:"Invalid credentials"})
