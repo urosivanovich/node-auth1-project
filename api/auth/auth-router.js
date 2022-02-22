@@ -104,6 +104,5 @@ const {
   }else{
     next({ status: 200, message: "no session" })
   }
-  
   })
 module.exports = router
